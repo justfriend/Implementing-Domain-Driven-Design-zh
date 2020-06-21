@@ -1,5 +1,7 @@
 # 第 2 章 领域、子域和限界上下文
 
+> Chapter 2. Domains, Subdomains, and Bounded Contexts
+
 There are just as many notes as I required, neither more nor less.
 
 —Mozart in the film Amadeus (Orion Pictures, Warner Brothers, 1984)

@@ -35,7 +35,7 @@ The principles of a Layers Architecture can still be used to govern good decisio
 
 For sure, SaaSOvation did not need every architectural influence all at once, but its teams needed to choose wisely from the options available to them.
 
-## INTERVIEWING THE SUCCESSFUL CIO
+## 4.1 INTERVIEWING THE SUCCESSFUL CIO 采访一个成功的 CIO
 
 To give a bit of a perspective on why each of the architectural influences discussed in the chapter might be used, we’re going to leap a decade into the future and talk to SaaSOvation’s CIO. While the company’s beginnings were humble, architectural decision helped it succeed each step of the way. Let’s tune in to the program TechMoney, with Anchor Maria Finance-Ilmundo . . .
 
@@ -133,7 +133,7 @@ Mitchell: My pleasure, Maria. Thanks for inviting me.
 
 That was a bit quirky, but helpful. It demonstrates how the architectural influences discussed in the following sections can be used with DDD, and how to introduce each at just the right time.
 
-## LAYERS
+## 4.2 LAYERS 分层
 
 The Layers Architecture [Buschmann et al.] pattern is considered by many to be the granddaddy of all. It supports N-tier systems and is, thus, commonly used in Web, enterprise, and desktop applications. Here we rigorously separate the various concerns of our application or system into well-defined layers.
 
@@ -156,8 +156,6 @@ Since a user may be either a human or other systems, sometimes this layer will p
 Components in the User Interface are direct clients of the Application Layer.
 
 Application Services (14) reside in the Application Layer. These are different from Domain Services (7) and are thus devoid of domain logic. They may control persistence transactions and security. They may also be in charge of sending Event-based notifications to other systems and/or for composing e-mail messages to be sent to users. The Application Services in this layer are the direct clients of the domain model, though themselves possessing no business logic. They remain very lightweight, coordinating operations performed against domain objects, such as Aggregates (10). They are the primary means of expressing use cases or user stories on the model. Hence, a common function of an Application Service is to accept parameters from the User Interface, use a Repository (12) to obtain an Aggregate instance, and then execute some command operation on it:
-
-Click here to view code image
 
 ```java
 @Transactional
@@ -199,7 +197,7 @@ The SaaSOvation teams noted that having the Infrastructure Layer at the bottom p
 
 Could we whip up something a bit sweeter if we adjusted the order of Layers?
 
-## Dependency Inversion Principle
+### 4.2.1 Dependency Inversion Principle 依赖倒置原则
 
 There is a way to improve on the traditional Layers Architecture by adjusting the way dependencies work. The Dependency Inversion Principle (DIP) was postulated by Robert C. Martin and described in [Martin, DIP]. The formal definition states:
 
@@ -216,8 +214,6 @@ Does DIP Really Support All Those Layers?
 Some would conclude that DIP has only two layers, one at the top and one at the bottom. The one at the top would implement interface abstractions defined in the layer at the bottom. Adjusting Figure 4.3 to fit this, the Infrastructure Layer would be the one at the top, and the User Interface Layer, Application Layer, and Domain Layer would constitute one at the bottom. You may or may not prefer this view of a DIP architecture. Don’t worry; the Hexagonal [Cockburn] or Ports and Adapters Architecture is where this is all headed.
 
 From the architecture of Figure 4.3, we would have a Repository implemented in Infrastructure for an interface defined in Domain:
-
-Click here to view code image
 
 ```java
 package com.saasovation.agilepm.infrastructure.persistence;
@@ -247,7 +243,7 @@ Focusing on the Domain Layer, using DIP enables both the Domain and Infrastructu
 
 Interestingly enough, when we think about the influence that DIP has on this architecture, we might conclude that there are actually no longer any layers at all. Both high-level and low-level concerns are dependent only on abstractions, which seems to topple the stack. What if we actually thought of turning this architecture on its ear and adding a bit more symmetry? Let’s next see how that would work.
 
-## HEXAGONAL OR PORTS AND ADAPTERS
+## 4.3 HEXAGONAL OR PORTS AND ADAPTERS 六边形架构（端口与适配器）
 
 With the Hexagonal Architecture2 Alistair Cockburn codified a style to produce symmetry [Cockburn]. It advances this goal by allowing many disparate clients to interact with the system on equal footing. Need a new client? Not a problem. Just add an Adapter to transform any given client’s input into that understood by the internal application’s API. At the same time, output mechanisms employed by the system, such as graphics, persistence, and messaging, may also be diverse and swappable. That’s possible because an Adapter is created to transform application results into a form accepted by a specific output mechanism.
 
@@ -280,8 +276,6 @@ When using Hexagonal, we design the application with our use cases in mind, not 
 The application receives requests by way of its public API. The application boundary, or inner hexagon, is also the use case (or user story) boundary. In other words, we should create use cases based on application functional requirements, not on the number of diverse clients or output mechanisms. When the application receives a request via its API, it uses the domain model to fulfill all requests involving the execution of business logic. Thus, the application’s API is published as a set of Application Services. Here again, Application Services are the direct client of the domain model, just as when using Layers.
 
 The following represents a RESTful resource published using JAX-RS. A request arrives through the HTTP input Port, and the handler acts as an Adapter, delegating to an Application Service:
-
-Click here to view code image
 
 ```java
 @Path("/tenants/{tenantId}/products")
@@ -323,7 +317,7 @@ When the SaaSOvation teams considered the advantages of using the Hexagonal Arch
 
 Because the Hexagonal Architecture is versatile, it could well be the foundation that supports other architectures required by the system. For instance, we might factor in Service-Oriented, REST, or an Event-Driven Architecture; employ CQRS; use a Data Fabric or Grid-Based Distributed Cache; or tack on Map-Reduce distributed and parallel processing, most of which are discussed later in this chapter. The Hexagonal style forms the strong foundation for supporting any and all of those additional architectural options. There are other ways, but for the remainder of this chapter assume that Ports and Adapters is used to assist with developing around each of the remaining topics discussed.
 
-## SERVICE-ORIENTED
+## 4.4 SERVICE-ORIENTED 面向服务架构
 
 The Service-Oriented Architecture, or SOA, has different meanings to different people. This can make discussions about it somewhat challenging. It’s best to try to find some common ground, or at least define the ground for this discussion. Consider some principles of SOA as defined by Thomas Erl [Erl]. Besides the fact that services are always interoperable, they also possess the eight design principles presented in Table 4.1.
 
@@ -362,13 +356,13 @@ The SaaSOvation teams had to learn a difficult and important lesson, that listen
 
 The three sample models discussed in Bounded Contexts (2), Context Maps (3), and Integrating Bounded Contexts (13) individually represent the single linguistically well-defined domain model. Each domain model is surrounded by a set of open services that implement an SOA that meets the business objectives.
 
-## REPRESENTATIONAL STATE TRANSFER—REST
+## 4.5 REPRESENTATIONAL STATE TRANSFER—REST REST
 
-## Contributed by Stefan Tilkov
+Contributed by Stefan Tilkov
 
 REST has become one of the most used, and abused, architecture buzzwords of the last few years. As usual, different people think about different things when they use the acronym. To some, REST means sending XML over HTTP connections without using SOAP; some equate it with using HTTP and JSON; others believe that to do REST you need to send method arguments as URI query parameters. All of these interpretations are wrong, but luckily—and vastly different from many other concepts such as “components” or “SOA”—there is an authoritative source for what REST means: the dissertation by Roy T. Fielding, which coined the term and defines it very clearly.
 
-## REST as an Architectural Style
+### 4.5.1 REST as an Architectural Style REST 作为一种架构风格
 
 The first thing to understand when trying to “get” REST is the concept of architectural styles. An architectural style is to architecture what a design pattern is to a specific design. It is an abstraction of those aspects that are common to different concrete implementations, enabling discussion of their relevant benefits without getting lost in technical detail. There are many different styles of distributed systems architecture, including client-server and distributed objects. The first few chapters of Fielding’s thesis explain some of them, including the constraints they mandate for an architecture that adheres to each of them. The concept of architectural styles and constraints imposed by them might strike you as somewhat theoretical, and you’d be right. They form the theoretical foundation of a (then) new architectural style that Fielding introduces. This is REST, which is the architectural style that the Web’s architecture is supposed to adhere to.
 
@@ -380,7 +374,7 @@ So why do we now equate “REST” with a specific way of building systems or, e
 
 In a very similar fashion, the Web protocols can be used in line with the original ideas that made them what they are—with an architecture that conforms to the REST architectural style—or be used in a way that fails to follow it. And similar to our RDBMS example, we ignore the underlying architectural style to our peril. Thus, a different kind of distributed systems architecture might be appropriate if we don’t end up exploiting any of the benefits of using HTTP in a “RESTful” way, just as a NoSQL/key-value store is the better choice for storing whole values that are associated with a single unique key.
 
-## Key Aspects of a RESTful HTTP Server
+### 4.5.2 Key Aspects of a RESTful HTTP Server RESTful HTTP 服务器的关键方面
 
 So what are the key aspects of a distribution architecture that uses “RESTful HTTP”? Let’s look at the server side first. Note that it’s entirely irrelevant whether we are talking about a server that’s used by a human using a Web browser (a “Web application”) or used by some other agent, such as a client written in your programming language of choice (a “Web service”).
 
@@ -398,7 +392,7 @@ Some HTTP methods are idempotent, meaning that they can be safely called again w
 
 Finally, a RESTful server enables a client to discover a path through the application’s possible state transitions by means of hypermedia. This is called Hypermedia as the Engine of Application State (HATEOAS) in Fielding’s dissertation. Put more simply, the individual resources don’t stand on their own. They are connected, linked to each other. This should not come as a surprise. After all, this is where the Web got its name. For the server, this means that it will embed links in its answers, enabling the client to interact with connected resources.
 
-## Key Aspects of a RESTful HTTP Client
+### 4.5.3 Key Aspects of a RESTful HTTP Client RESTful HTTP 客户端的关键方面
 
 A RESTful HTTP client moves from one resource to the next either by following links contained in resource representations or by being redirected to resources as a result of sending data for processing to the server. Server and client cooperate to influence the client’s distribution behavior dynamically. As a URI contains all information necessary for dereferencing an address—including host name and port—a client following the hypermedia principle might end up talking to a resource hosted by a different application, a different host, or even a different company.
 
@@ -406,7 +400,7 @@ In an ideal REST setup, a client will start with a single well-known URI and con
 
 Granted, a browser is not a self-sufficient agent. It requires a human to make the actual decisions. But a programmatic client can adopt many of the same principles, even when some logic is hard-coded. It will follow links instead of assuming specific URI structures, or even colocation of resources in one server, and it will make use of its knowledge of one or more media types.
 
-## REST and DDD
+### 4.5.4 REST and DDD REST 和 DDD
 
 Tempting though it may be, it is not advisable to directly expose a domain model via RESTful HTTP. This approach often leads to system interfaces that are more brittle than they need to be, as each change in the domain model is directly reflected in the system interface. There are two alternative approaches for combining DDD and RESTful HTTP.
 
@@ -424,11 +418,11 @@ This reflects more of an outside-in, crosscutting approach. In the workgroup and
 
 Which of these two approaches is chosen depends to a large degree on the goals of the system designer in terms of reusability. The more specialized the solution, the more useful the first approach turns out to be. The more generally useful the solution is, with the extreme end of the spectrum being standardization by an official standards body, the more sense it makes to go with the second, media-type-centric approach.
 
-## Why REST?
+### 4.5.5 Why REST? 为什么是 REST？
 
 In my experience, a system designed conforming to REST principles fulfills the promise of loose coupling. In general, it’s very easy to add new resources and links to them in existing resource representations. It’s also easy to add support for new formats where needed, leading to a much less brittle set of system connections. A REST-based system is much easier to understand, as it’s split into smaller chunks—the resources—each of which exposes a separately testable, debuggable, and usable entry point. The design of HTTP and the maturity of the tooling with support for features such as URI rewriting and caching make RESTful HTTP a great choice for architectures that need to be both loosely coupled and highly scalable.
 
-## COMMAND-QUERY RESPONSIBILITY SEGREGATION, OR CQRS
+## 4.6 COMMAND-QUERY RESPONSIBILITY SEGREGATION, OR CQRS 命令和查询职责分离——CQRS
 
 It can be difficult to query from Repositories all the data users need to view. This is especially so when user experience design creates views of data that cuts across a number of Aggregate types and instances. The more sophisticated your domain, the more this situation tends to occur.
 
@@ -466,7 +460,7 @@ As a result, the traditional domain model would be split in two. The command mod
 
 <Figures figure="4-6">With CQRS, commands from clients travel one way to the command model. Queries are run against a separate data source optimized for presentation and delivered as user interface or reports.</Figures>
 
-## Examining Areas of CQRS
+### 4.6.1 Examining Areas of CQRS CQRS 的各个方面
 
 Let’s step through each of the major areas of this pattern. We can start with the client and query support and move through to the command model and how updates to the query model are done.
 
@@ -522,8 +516,6 @@ Whatever kind of handler is used, decouple each one from all others. Do not allo
 
 Command Handlers generally do only a few things. If one has a creation aspect, it instantiates a new Aggregate instance and adds the new instance to its Repository. Most often it gets an Aggregate instance from its Repository and executes a command method behavior on it:
 
-Click here to view code image
-
 ```java
 @Transactional
 public void commitBacklogItemToSprint(
@@ -542,8 +534,6 @@ When the Command Handler completes, a single Aggregate instance has been updated
 
 Command Model (or Write Model) Executes Behavior
 As each command method on the command model is executed, it completes by publishing an Event as described in Domain Events (8). Using the running example, the BacklogItem would complete its command method as follows:
-
-Click here to view code image
 
 ```java
 public class BacklogItem extends ConcurrencySafeEntity  {
@@ -584,7 +574,7 @@ What happens when a new user interface view is created but its data must be crea
 
 If the command model is persisted using an ORM, use the backing command model store to populate the new query model table. This may employ a common data warehousing (or report database) generation technique, such as extract, transform, load (ETL). Extract the data from the command model store, transform it as needed by the user interface, and load it into the query model store.
 
-## Dealing with an Eventually Consistent Query Model
+### 4.6.2 Dealing with an Eventually Consistent Query Model 处理具有最终一致性的查询模型
 
 If the query model is designed to be eventually consistent—query model updates are performed asynchronously following writes to the command model store—there will be resulting idiosyncrasies in the user interface to deal with. For example, after a user submits a command, will the next user interface view have the fully updated and consistent data reflected from the query model? It may depend on system load and other factors. But we had better assume not and design for the worst case, where the user interface is never consistent.
 
@@ -598,7 +588,7 @@ Yet, it’s possible that the delayed view data synchronization is not a critica
 
 As with every pattern, CQRS introduces a number of competing forces. We must exercise a great deal of care and choose wisely. Certainly if a user interface is not overly complex or regularly cut across several different Aggregates in a single view, employing CQRS would serve to introduce accidental complexity rather than necessary complexity. CQRS is the right choice when it removes a risk that has a high probability of causing failure if ignored.
 
-## EVENT-DRIVEN ARCHITECTURE
+## 4.7 EVENT-DRIVEN ARCHITECTURE 事件驱动架构
 
 Event-driven architecture (EDA) is a software architecture promoting the production, detection, consumption of, and reaction to events. [Wikipedia, EDA]
 
@@ -618,7 +608,7 @@ The Domain Events published by one such system through the output Port would be 
 
 It’s possible that a specific Domain Event received represents only one part of a multitask process. Until all anticipated Domain Events arrive, the multitask process is not considered completed. But how does the process begin? How is it distributed across the enterprise? And how do we handle tack progress through to process completion? The answers are discussed subsequently in the section on long-running processes. But first some initial groundwork is in order. Message-based systems often reflect a Pipes and Filters style.
 
-## Pipes and Filters
+### 4.7.1 Pipes and Filters 管道和过滤器
 
 In one of its simplest forms, Pipes and Filters are available using a shell/console command line:
 
@@ -637,8 +627,6 @@ Here a Linux command line is used to find how many contacts are in the fancy per
 3. Finally, wc reads its standard input stream, which was piped from grep’s standard output. The command-line argument to wc is -l, telling it to count the number of lines it reads. It outputs the result, which in this case is 3, because three lines were output by grep. Note that now the standard output is displayed to the console since this time there is no Pipe to an additional command.
 
 This can be approximated using a Windows console, but with less piping:
-
-Click here to view code image
 
 ```sh
 C:\fancy_pim> type phone_numbers.txt | find /c "303"
@@ -684,7 +672,7 @@ In an actual DDD scenario, Domain Events reflect names meaningful to the busines
 
 As explained in Domain Events (8), these are not just paper-thin technical notifications. They explicitly model business process activity occurrences that are useful for domain-wide subscribers to know about, and they pack unique identity and as many knowledge-conveying properties as necessary to clearly get their point across. Yet this synchronous, step-by-step style can be extended to accomplish more than one thing at the same time.
 
-## Long-Running Processes, aka Sagas
+### 4.7.2 Long-Running Processes, aka Sagas 长时处理过程（也叫 Saga）
 
 The synthetic Pipes and Filters example can be extended to demonstrate another Event-Driven, distributed, parallel processing pattern, namely, Long-Running Processes. A Long-Running Process is sometimes called a Saga, but depending on your background that name may collide with a preexisting pattern. An early description of Sagas is presented in [Garcia-Molina & Salem]. In an attempt to avoid confusion and ambiguity, I have chosen to use the name Long-Running Process, and sometimes I use the name Process for brevity.
 
@@ -703,11 +691,9 @@ Different Ways to Design a Long-Running Process
 
 Here are three approaches to designing a Long-Running Process, although there may be more:
 
-• Design the process as a composite task, which is tracked by an executive component that records the steps and completeness of the task using a persistent object. This is the approach discussed most thoroughly here.
-
-• Design the process as a set of partner Aggregates that collaborate in a set of activities. One or more Aggregate instances act as the executive and maintain the overall state of the process. This is the approach promoted by Amazon’s Pat Helland [Helland].
-
-• Design a stateless process in that each message handler component that receives an Event-carrying message must enrich the received Event with more task progress information as it sends the next message. The state of the overall process is maintained only in the body of each message sent from collaborator to collaborator.
+- Design the process as a composite task, which is tracked by an executive component that records the steps and completeness of the task using a persistent object. This is the approach discussed most thoroughly here.
+- Design the process as a set of partner Aggregates that collaborate in a set of activities. One or more Aggregate instances act as the executive and maintain the overall state of the process. This is the approach promoted by Amazon’s Pat Helland [Helland].
+- Design a stateless process in that each message handler component that receives an Event-carrying message must enrich the received Event with more task progress information as it sends the next message. The state of the overall process is maintained only in the body of each message sent from collaborator to collaborator.
 
 Since the initial Event is now subscribed to by two components, both Filters receive the same Event virtually simultaneously. The original Filter goes about as it always has, matching the specific 303 text pattern. The new Filter only counts all lines, and when it has completed, it sends the Event AllPhoneNumbersCounted. The Event includes the count of total contacts. If there are, for example, 15 total phone numbers, the Event count property is set to 15.
 
@@ -764,7 +750,7 @@ Long-Running Processes are often useful when integration with legacy systems can
 
 Some messaging mechanisms have built-in support for Long-Running Processes, which can greatly expedite adoption. One such is [NServiceBus], which specifically calls them Sagas. Another Saga implementation is provided with [MassTransit].
 
-## Event Sourcing
+### 4.7.3 Event Sourcing 事件源
 
 Sometimes the business cares about tracking changes that occur to the objects in a domain model. There are varying levels of change tracking interest, and ways to support each level. Typically businesses have chosen to track only when some entity is created and last modified, and by whom. It’s a relatively simple and straightforward approach to change tracking. This, however, doesn’t provide any information about the individual changes in the model.
 
@@ -800,19 +786,17 @@ Since Event Sourcing leads us down the path of thinking differently about the wa
 
 But technical advantages don’t always sell techniques to the business. Thus, consider just a few of the business advantages of using Event Sourcing that are afforded due to the technical implementation:
 
-• Patch the Event Store with new or modified Events that fix problems. This may have business implications, but if it is legal in a given situation, the patch can save the system from serious issues that occurred because of bugs in the model. Since the patches have a built-in audit trail, the use of patches may decrease any legal implications by making them explicit and traceable.
-
-• Besides patching, we can also undo and redo changes in the model by replaying varying sets of Events. This may have technical implications and business implications and may not be possible to support in all cases.
-
-• With an accurate history of everything that has occurred in the domain model, the business can consider “what if?” questions. That is, by playing back stored Events on a set of Aggregates that have experimental enhancements, the business can get accurate answers to hypothetical questions. Would the business benefit if it could simulate conceptual scenarios using real historical data? Very likely, yes. It’s an alternative way to approach business intelligence.
+- Patch the Event Store with new or modified Events that fix problems. This may have business implications, but if it is legal in a given situation, the patch can save the system from serious issues that occurred because of bugs in the model. Since the patches have a built-in audit trail, the use of patches may decrease any legal implications by making them explicit and traceable.
+- Besides patching, we can also undo and redo changes in the model by replaying varying sets of Events. This may have technical implications and business implications and may not be possible to support in all cases.
+- With an accurate history of everything that has occurred in the domain model, the business can consider “what if?” questions. That is, by playing back stored Events on a set of Aggregates that have experimental enhancements, the business can get accurate answers to hypothetical questions. Would the business benefit if it could simulate conceptual scenarios using real historical data? Very likely, yes. It’s an alternative way to approach business intelligence.
 
 Would the business benefit from one or more of these technical and nontechnical advantages?
 
 Appendix A provides rich details on implementing Aggregates with Event Sourcing and discusses how views may be projected for CQRS. For further details see [Dahan, CQRS] and [Nijof, CQRS].
 
-## DATA FABRIC AND GRID-BASED DISTRIBUTED COMPUTING
+## 4.8 DATA FABRIC AND GRID-BASED DISTRIBUTED COMPUTING 数据网织和基于网格的分布式计算
 
-## Contributed by Wes Williams
+Contributed by Wes Williams
 
 As software systems become more and more complex and sophisticated, with expanding user bases and requirements centered around “big data,” traditional database solutions can become performance bottlenecks. Organizations that face the realities of information systems of colossal size have no alternative but to seek solutions that are equal to the computing challenges. Data Fabrics—also sometimes called Grid Computing12—offer performance and elastic scalability capabilities that such business situations demand.
 
@@ -831,8 +815,6 @@ One good thing about Data Fabrics is that they support domain models in a natura
 
 14. In GemFire this is called a region, but it’s the same concept that Coherence calls a cache. I use cache for consistency.
 
-Click here to view code image
-
 ```java
 String key = product.productId().id();
 byte[] value = Serializer.serialize(product);
@@ -846,7 +828,7 @@ Thus, a positive consequence of using a Data Fabric with features closely aligne
 
 The examples provided in this section demonstrate how a Data Fabric can host a domain model in cache and enable system functionalities at distributed scale. In doing so, we’ll explore ways to support the CQRS architecture pattern and Event-Driven Architecture using Long-Running Processes.
 
-## Data Replication
+### 4.8.1 Data Replication 数据复制
 
 Thinking of an in-memory data cache, we may immediately consider the real possibility of losing all or part of our system’s state if the cache fails in some way. It’s a real concern, but far from troublesome when redundancy is built into the Fabric.
 
@@ -856,7 +838,7 @@ Here’s an example of how cache (or region, again depending on the concrete Fab
 
 An additional advantage of fail-over nodes is that they ensure guaranteed delivery of events published from the Fabric. Thus, updates to Aggregates and any Fabric events published as a result are never lost. Obviously, cache redundancy and replication are essential features for storing business-critical domain model objects.
 
-## Event-Driven Fabrics and Domain Events
+### 4.8.2 Event-Driven Fabrics and Domain Events 事件驱动网织和领域事件
 
 A primary feature of a Fabric is the support of an Event-Driven style, with guaranteed delivery. Most Fabrics have built-in eventing of a technical nature, that is, the automatic notification of events that inform about cache-level and entry-level occurrences. Those should not be confused with Domain Events. For example, a cache-level event informs of happenings such as cache reinitialization, and an entry-level event informs about occurrences such as entry creation and updates.
 
@@ -866,13 +848,11 @@ How might you actually use Domain Events in a Fabric? As discussed in Domain Eve
 
 Since Domain Event subscribers may also use the Events to carry out the synchronization of other dependent Aggregates, eventual consistency is guaranteed by means of the architecture.
 
-## Continuous Queries
+### 4.8.3 Continuous Queries 持续查询
 
 Some Fabrics support a kind of event notification known as Continuous Query. This enables a client to register a query with the Fabric that will ensure that the client receives notification of changes in the cache that satisfy the query. One use of the Continuous Query is by user interface components, which enables these to listen for changes that could impact the current view.
 
 Do you see what’s coming? CQRS has a strong fit with the Continuous Query feature, assuming that the query model is maintained in the Fabric. Rather than requiring the view to chase after view table updates, the notifications delivered as registered Continuous Queries are resolved, allowing the views to update just in time. Here’s an example of a client registering for GemFire Continuous Query events:
-
-Click here to view code image
 
 ```java
 CqAttributesFactory factory = new CqAttributesFactory();
@@ -887,15 +867,13 @@ CqQuery backlogItemWatcher = queryService.newCq(
 
 The Data Fabric will now deliver CQRS query model updates based on Aggregate modifications to the client callback object provided by the CqListener, along with metadata that was added, updated, or destroyed when the matching criteria are met.
 
-## Distributed Processing
+### 4.8.4 Distributed Processing 分布式处理
 
 A powerful use of a Data Fabric is to distribute processing across the Fabric’s replicated caches and return the aggregated results to the client. This enables the Fabric to fulfill Event-Driven, distributed parallel processing, perhaps using Long-Running Processes.
 
 To illustrate this feature, we’ll have to mention some concrete approaches in GemFire and Coherence. Your Process executive could be implemented as a GemFire Function or a Coherence Entry Processor. Both can serve as Command [Gamma et al.] handlers that execute in parallel across distributed, replicated cache. (You might instead choose to think of this concept as a Domain Service, but what it does may not be domain-centric.) For consistency let’s call this feature a Function. A Function can optionally accept a filter to constrain the execution against matching Aggregate instances.
 
 Let’s look at a sample Function that implements a Long-Running Process for the previously presented Phone Number Count Process. This Process will be executed in parallel across the replicated cache using a GemFire Function:
-
-Click here to view code image
 
 ```java
 public class PhoneNumberCountSaga extends FunctionAdapter {
@@ -921,8 +899,6 @@ public class PhoneNumberCountSaga extends FunctionAdapter {
 
 Here is sample code for a client that will execute a Long-Running Process in parallel against distributed replicated cache:
 
-Click here to view code image
-
 ```java
 PhoneNumberCountProcess phoneNumberCountProcess =
          new PhoneNumberCountProcess();
@@ -943,3 +919,15 @@ List allPhoneNumberCountResults = (List) resultsCollector.getResult();
 Of course, the process could be much more complex or far simpler than this one. This also demonstrates that a Process is not of necessity an Event-Driven concept, but one that can work with other concurrent, distributed processing approaches. For a full discussion of Fabric-based distributed and parallel processing, see [GemFire Functions].
 
 ![](./figures/ch4/own_it.jpg)
+
+## 4.9 WRAP-UP 本章小结
+
+We’ve reviewed several architectural styles and architecture patterns that can be used with DDD. This is not an exhaustive list because there are just too many possibilities, which emphasizes the versatility of DDD. For example, we haven’t considered how to apply DDD when Map-Reduce is at play. That’s a topic for a future discussion.
+
+- We’ve discussed the traditional Layers Architecture and how it can be improved on by using the Dependency Inversion Principle.
+- You’ve learned about the strengths of the possibly timeless Hexagonal Architecture, which provides an overarching style for application architectures.
+- We’ve emphasized how DDD should be used in an SOA environment, with REST, and using a Data Fabric or a Grid-Based Distributed Cache.
+- You got an overview of CQRS and how it can simplify some aspects of the application.
+- We’ve taken a look at the various aspects of how Event-Driven works, including Pipes and Filters, Long-Running Processes, and even a glimpse at Event Sourcing.
+
+We next move on to a series of chapters on DDD tactical modeling. Those chapters will help you see the finer-grained modeling options at your disposal, and how to best put them to work.

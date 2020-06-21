@@ -1,5 +1,7 @@
 # 第 1 章 DDD 入门
 
+> Chapter 1. Getting Started with DDD
+
 Design is not just what it looks like and feels like. Design is how it works.
 
 —Steve Jobs
